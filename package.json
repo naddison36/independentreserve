@@ -1,0 +1,24 @@
+{
+    "name": "independentreserve",
+    "version": "0.0.1",
+    "description": "Independent Reserve API Client for Node.JS",
+    "main": "index.js",
+    "dependencies": {
+        "request": ">=2.40.0",
+        "underscore": ">=1.6.0",
+        "crypto": "0.0.3",
+        "verror": "1.4.0"
+    },
+    "keywords": [
+        "independentreserve",
+        "api",
+        "exchange",
+        "bitcoin"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/naddison36/independentreserve"
+    },
+    "author": "Nick Addison",
+    "license": "MIT"
+}
