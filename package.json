@@ -1,6 +1,6 @@
 {
     "name": "independentreserve",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "Independent Reserve API Client for Node.JS",
     "main": "index.js",
     "dependencies": {

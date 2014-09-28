@@ -10,28 +10,23 @@ var IndependentReserve = function(key, secret, server)
 
     this.url = server || 'https://api.independentreserve.com';
 
-    // initialize nonce to current unix time in seconds
-    this.nonce = Math.round((new Date()).getTime() / 1000);
-};
-
-IndependentReserve.prototype._nonce = function() {
-    return this.nonce++;
+    // initialize nonce to current unix time in milliseconds
+    this.nonce = (new Date()).getTime();
 };
 
 IndependentReserve.prototype.postReq = function(action, callback, params)
 {
-    var functionName = 'IndependentReserve.postReq()',
-        self = this;
+    var functionName = 'IndependentReserve.postReq()';
 
     // Set custom User-Agent string
-    var headers = {"User-Agent": "Independent Reserve Javascript API Client"}
+    var headers = {"User-Agent": "Independent Reserve Javascript API Client"};
 
     var path = '/Private/' + action;
 
     if(!this.key || !this.secret)
         return callback('Must provide key and secret to make this API request.');
 
-    var nonce = this._nonce();
+    var nonce = this.nonce++;
     var message = nonce + this.key;
     var signer = crypto.createHmac('sha256', new Buffer(this.secret, 'utf8'));
     var signature = signer.update(message).digest('hex').toUpperCase();
@@ -56,12 +51,15 @@ IndependentReserve.prototype.postReq = function(action, callback, params)
             if(err)
             {
                 var error = new VError(err, '%s failed to call url %s with nonce %s', functionName,
-                    options.url, self.nonce);
+                    options.url, nonce);
                 return callback(error);
             }
             else if (body.Message)
             {
-                var error = new Error(body.Message);
+                var error = new VError('%s failed to call url %s with nonce %s. Response message: %s', functionName,
+                    options.url, nonce, body.Message);
+                error.name = body.Message;
+
                 return callback(error);
             }
 
@@ -117,8 +115,8 @@ IndependentReserve.prototype.getReq = function(action, callback, params)
 
             if (err)
             {
-                var error = new VError(err, '%s failed to call url %s with nonce %s', functionName,
-                    options.url, self.nonce);
+                var error = new VError(err, '%s failed to call url %s', functionName,
+                    options.url);
                 return callback(error);
             }
 
@@ -141,7 +139,10 @@ IndependentReserve.prototype.getReq = function(action, callback, params)
 
             if (data.Message)
             {
-                var error = new Error(data.Message);
+                var error = new VError('%s failed to call url %s. Response message: %s', functionName,
+                    options.url, data.Message);
+                error.name = data.Message;
+
                 return callback(error);
             }
 
@@ -192,9 +193,9 @@ IndependentReserve.prototype.getOrderBook = function getOrderBook(primaryCurrenc
     );
 };
 
-IndependentReserve.prototype.GetRecentTrades = function(primaryCurrencyCode, secondaryCurrencyCode, numberOfRecentTradesToRetrieve, callback)
+IndependentReserve.prototype.getRecentTrades = function getRecentTrades(primaryCurrencyCode, secondaryCurrencyCode, numberOfRecentTradesToRetrieve, callback)
 {
-    this.getReq('getRecentTrades', callback, {
+    this.getReq('GetRecentTrades', callback, {
         primaryCurrencyCode: primaryCurrencyCode,
         secondaryCurrencyCode: secondaryCurrencyCode,
         numberOfHoursInThePastToRetrieve: numberOfHoursInThePastToRetrieve}
@@ -307,7 +308,7 @@ IndependentReserve.prototype.getTransactions = function getTransactions(accountG
     );
 };
 
-IndependentReserve.prototype.getBitcoinDepositAddress = function(callback)
+IndependentReserve.prototype.getBitcoinDepositAddress = function getBitcoinDepositAddress(callback)
 {
     this.postReq('GetBitcoinDepositAddress', callback);
 };
