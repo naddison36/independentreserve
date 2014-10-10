@@ -1,11 +1,12 @@
 {
     "name": "independentreserve",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "description": "Independent Reserve API Client for Node.JS",
     "main": "index.js",
     "dependencies": {
         "request": ">=2.40.0",
         "underscore": ">=1.6.0",
+        "cheerio": "0.17.0",
         "crypto": "0.0.3",
         "verror": "1.4.0"
     },

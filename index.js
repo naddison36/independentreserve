@@ -1,156 +1,127 @@
-var _ = require('underscore'),
+var util = require('util'),
+    _ = require('underscore'),
     request	= require('request'),
     crypto = require('crypto'),
+    cheerio = require('cheerio'),
     VError = require('verror');
 
-var IndependentReserve = function(key, secret, server)
+var IndependentReserve = function(key, secret, server, timeout)
 {
     this.key = key;
     this.secret = secret;
 
-    this.url = server || 'https://api.independentreserve.com';
+    this.server = server || 'https://api.independentreserve.com';
+    this.timeout = timeout || 20000;    // in milliseconds
 
     // initialize nonce to current unix time in milliseconds
     this.nonce = (new Date()).getTime();
 };
 
-IndependentReserve.prototype.postReq = function(action, callback, params)
+IndependentReserve.prototype.postRequest = function postRequest(action, callback, params)
 {
-    var functionName = 'IndependentReserve.postReq()';
+    var functionName = 'IndependentReserve.postRequest()';
+
+    if(!this.key || !this.secret)
+    {
+        var error = new VError('The API key and secret must be set on initiation of the IndependentReserve function for private API request.');
+        return callback(error);
+    }
 
     // Set custom User-Agent string
     var headers = {"User-Agent": "Independent Reserve Javascript API Client"};
 
     var path = '/Private/' + action;
 
-    if(!this.key || !this.secret)
-        return callback('Must provide key and secret to make this API request.');
-
     var nonce = this.nonce++;
     var message = nonce + this.key;
     var signer = crypto.createHmac('sha256', new Buffer(this.secret, 'utf8'));
     var signature = signer.update(message).digest('hex').toUpperCase();
 
-    params = _.extend({
+    var postData = _.extend({
         apiKey: this.key,
         signature: signature,
         nonce: nonce
     }, params);
 
     var options = {
-        url: this.url + path,
+        url: this.server + path,
         method: 'POST',
         headers: headers,
-        json: params
+        json: postData,
+        timeout: this.timeout
     };
 
-    var req = request.post(options, function(err, response, body)
-    {
-        if(typeof callback === 'function')
-        {
-            if(err)
-            {
-                var error = new VError(err, '%s failed to call url %s with nonce %s', functionName,
-                    options.url, nonce);
-                return callback(error);
-            }
-            else if (body.Message)
-            {
-                var error = new VError('%s failed to call url %s with nonce %s. Response message: %s', functionName,
-                    options.url, nonce, body.Message);
-                error.name = body.Message;
+    var requestDesc = util.format('%s request to url %s with nonce %s and params %s',
+        options.method, options.url, nonce, JSON.stringify(params));
 
-                return callback(error);
-            }
-
-            var data;
-
-            try
-            {
-                // need to strip out the first character if it is a byte order mark (BOM)
-                if (body.charAt(0) == '\uFEFF')
-                {
-                    body = body.slice(1);
-                }
-
-                data = JSON.parse(body);
-            }
-            catch(err)
-            {
-                var error = new VError(err, '%s could not parse response body from url %s: %s', functionName,
-                    options.url, body);
-                return callback(error);
-            }
-
-            callback(null, data);
-        }
-    });
-
-    return req;
+    executeRequest(options, requestDesc, callback);
 };
 
-IndependentReserve.prototype.getReq = function(action, callback, params)
+IndependentReserve.prototype.getRequest = function(action, callback, params)
 {
-    var functionName = 'IndependentReserve.getReq()';
+    var functionName = 'IndependentReserve.getRequest()';
 
     // Set custom User-Agent string
-    var headers = {};
-    headers['User-Agent'] = 'Independent Reserve Javascript API Client';
+    var headers = {"User-Agent": "Independent Reserve Javascript API Client"};
 
     var path = '/Public/' + action;
 
     var options = {
-        url: this.url + path,
+        url: this.server + path,
         method: 'GET',
         headers: headers,
         qs: params,
-        timeout: 15000
+        json: {},   // set to empty object so json response will be parsed
+        timeout: this.timeout
     };
 
-    var req = request.get(options, function(err, response, body)
+    var requestDesc = util.format('%s request to url %s with params %s',
+        options.method, options.url, JSON.stringify(params));
+
+    executeRequest(options, requestDesc, callback);
+};
+
+function executeRequest(options, requestDesc, callback)
+{
+    var functionName = 'IndependentReserve.executeRequest()';
+
+    request(options, function(err, response, data)
     {
-        if(typeof callback === 'function')
+        var error = null;   // default to no error
+
+        if(err)
         {
-            var data;
-
-            if (err)
-            {
-                var error = new VError(err, '%s failed to call url %s', functionName,
-                    options.url);
-                return callback(error);
-            }
-
-            try
-            {
-                // need to strip out the first character if it is a byte order mark (BOM)
-                if (body.charAt(0) == '\uFEFF')
-                {
-                    body = body.slice(1);
-                }
-
-                data = JSON.parse(body);
-            }
-            catch(err)
-            {
-                var error = new VError(err, '%s could not parse response body from url %s: %s', functionName,
-                    options.url, body);
-                return callback(error);
-            }
-
-            if (data.Message)
-            {
-                var error = new VError('%s failed to call url %s. Response message: %s', functionName,
-                    options.url, data.Message);
-                error.name = data.Message;
-
-                return callback(error);
-            }
-
-            callback(null, data);
+            error = new VError(err, '%s failed %s', functionName, requestDesc);
+            error.name = err.code;
         }
-    });
+        else if (!data)
+        {
+            error = new VError('%s failed %s. No data returned.', functionName, requestDesc );
+        }
+        else if (data.Message)
+        {
+            error = new VError('%s failed %s. Response message: %s', functionName, requestDesc, data.Message);
+            error.name = data.Message;
+        }
+        // if request was not able to parse json response into an object
+        else if (!_.isObject(data) )
+        {
+            // try and parse HTML body form response
+            $ = cheerio.load(data);
+            var responseBody = $('body').text();
 
-    return req;
+            if (responseBody)
+            {
+                error = new VError(err, '%s could not json parse response from %s. Response body:\n%s', functionName, requestDesc, responseBody);
+            }
+            else
+            {
+                error = new VError(err, '%s could not parse json or HTML body from %s', functionName, requestDesc);
+            }
+        }
+
+        callback(error, data);
+    });
 };
 
 //
@@ -159,27 +130,27 @@ IndependentReserve.prototype.getReq = function(action, callback, params)
 
 IndependentReserve.prototype.getValidPrimaryCurrencyCodes = function getValidPrimaryCurrencyCodes(callback)
 {
-    this.getReq('getValidPrimaryCurrencyCodes', callback);
+    this.getRequest('getValidPrimaryCurrencyCodes', callback);
 };
 
 IndependentReserve.prototype.getValidSecondaryCurrencyCodes = function getValidSecondaryCurrencyCodes(callback)
 {
-    this.getReq('GetValidSecondaryCurrencyCodes', callback);
+    this.getRequest('GetValidSecondaryCurrencyCodes', callback);
 };
 
 IndependentReserve.prototype.getValidLimitOrderTypes = function getValidLimitOrderTypes(callback)
 {
-    this.getReq('GetValidLimitOrderTypes', callback);
+    this.getRequest('GetValidLimitOrderTypes', callback);
 };
 
 IndependentReserve.prototype.getValidMarketOrderTypes = function getValidMarketOrderTypes(callback)
 {
-    this.getReq('getValidMarketOrderTypes', callback);
+    this.getRequest('getValidMarketOrderTypes', callback);
 };
 
 IndependentReserve.prototype.getMarketSummary = function getMarketSummary(primaryCurrencyCode, secondaryCurrencyCode, callback)
 {
-    this.getReq('getMarketSummary', callback, {
+    this.getRequest('getMarketSummary', callback, {
         primaryCurrencyCode: primaryCurrencyCode,
         secondaryCurrencyCode: secondaryCurrencyCode}
     );
@@ -187,7 +158,7 @@ IndependentReserve.prototype.getMarketSummary = function getMarketSummary(primar
 
 IndependentReserve.prototype.getOrderBook = function getOrderBook(primaryCurrencyCode, secondaryCurrencyCode, callback)
 {
-    this.getReq('GetOrderBook', callback, {
+    this.getRequest('GetOrderBook', callback, {
         primaryCurrencyCode: primaryCurrencyCode,
         secondaryCurrencyCode: secondaryCurrencyCode}
     );
@@ -195,7 +166,7 @@ IndependentReserve.prototype.getOrderBook = function getOrderBook(primaryCurrenc
 
 IndependentReserve.prototype.getRecentTrades = function getRecentTrades(primaryCurrencyCode, secondaryCurrencyCode, numberOfRecentTradesToRetrieve, callback)
 {
-    this.getReq('GetRecentTrades', callback, {
+    this.getRequest('GetRecentTrades', callback, {
         primaryCurrencyCode: primaryCurrencyCode,
         secondaryCurrencyCode: secondaryCurrencyCode,
         numberOfHoursInThePastToRetrieve: numberOfHoursInThePastToRetrieve}
@@ -208,7 +179,7 @@ IndependentReserve.prototype.getRecentTrades = function getRecentTrades(primaryC
 
 IndependentReserve.prototype.placeLimitOrder = function placeLimitOrder(primaryCurrencyCode, secondaryCurrencyCode, orderType, price, volume, callback)
 {
-    this.postReq('PlaceLimitOrder', callback, {
+    this.postRequest('PlaceLimitOrder', callback, {
         primaryCurrencyCode: primaryCurrencyCode,
         secondaryCurrencyCode: secondaryCurrencyCode,
         orderType: orderType,
@@ -219,7 +190,7 @@ IndependentReserve.prototype.placeLimitOrder = function placeLimitOrder(primaryC
 
 IndependentReserve.prototype.placeMarketOrder = function placeMarketOrder(primaryCurrencyCode, secondaryCurrencyCode, orderType, volume, callback)
 {
-    this.postReq('PlaceMarketOrder', callback, {
+    this.postRequest('PlaceMarketOrder', callback, {
             primaryCurrencyCode: primaryCurrencyCode,
             secondaryCurrencyCode: secondaryCurrencyCode,
             orderType: orderType,
@@ -229,7 +200,7 @@ IndependentReserve.prototype.placeMarketOrder = function placeMarketOrder(primar
 
 IndependentReserve.prototype.cancelOrder = function cancelOrder(orderGuid, callback)
 {
-    this.postReq('CancelOrder', callback, {orderGuid: orderGuid});
+    this.postRequest('CancelOrder', callback, {orderGuid: orderGuid});
 };
 
 IndependentReserve.prototype.getOpenOrders = function getOpenOrders(primaryCurrencyCode, secondaryCurrencyCode, pageIndex, pageSize, callback)
@@ -247,7 +218,7 @@ IndependentReserve.prototype.getOpenOrders = function getOpenOrders(primaryCurre
         return callback(error);
     }
 
-    this.postReq('GetOpenOrders', callback, {
+    this.postRequest('GetOpenOrders', callback, {
             primaryCurrencyCode: primaryCurrencyCode,
             secondaryCurrencyCode: secondaryCurrencyCode,
             pageIndex: pageIndex,
@@ -270,7 +241,7 @@ IndependentReserve.prototype.getClosedOrders = function getClosedOrders(primaryC
         return callback(error);
     }
 
-    this.postReq('GetClosedOrders', callback, {
+    this.postRequest('GetClosedOrders', callback, {
             primaryCurrencyCode: primaryCurrencyCode,
             secondaryCurrencyCode: secondaryCurrencyCode,
             pageIndex: pageIndex,
@@ -280,7 +251,7 @@ IndependentReserve.prototype.getClosedOrders = function getClosedOrders(primaryC
 
 IndependentReserve.prototype.getAccounts = function getAccounts(callback)
 {
-    this.postReq('GetAccounts', callback);
+    this.postRequest('GetAccounts', callback);
 };
 
 
@@ -299,7 +270,7 @@ IndependentReserve.prototype.getTransactions = function getTransactions(accountG
         return callback(error);
     }
 
-    this.postReq('GetTransactions', callback, {
+    this.postRequest('GetTransactions', callback, {
         accountGuid: accountGuid,
         fromTimestampUtc: fromTimestampUtc,
         toTimestampUtc: toTimestampUtc,
@@ -310,7 +281,7 @@ IndependentReserve.prototype.getTransactions = function getTransactions(accountG
 
 IndependentReserve.prototype.getBitcoinDepositAddress = function getBitcoinDepositAddress(callback)
 {
-    this.postReq('GetBitcoinDepositAddress', callback);
+    this.postRequest('GetBitcoinDepositAddress', callback);
 };
 
 module.exports = IndependentReserve;
