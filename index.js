@@ -226,6 +226,13 @@ IndependentReserve.prototype.getOpenOrders = function getOpenOrders(primaryCurre
     );
 };
 
+IndependentReserve.prototype.getOrderDetails = function getOrderDetails(orderGuid, callback)
+{
+    this.postRequest('GetOrderDetails', callback, {
+            orderGuid: orderGuid}
+    );
+};
+
 IndependentReserve.prototype.getClosedOrders = function getClosedOrders(primaryCurrencyCode, secondaryCurrencyCode, pageIndex, pageSize, callback)
 {
     var functionName = 'IndependentReserve.getClosedOrders()';
