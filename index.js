@@ -11,7 +11,7 @@ var IndependentReserve = function(key, secret, server, timeout)
     this.secret = secret;
 
     this.server = server || 'https://api.independentreserve.com';
-    this.timeout = timeout || 20000;    // in milliseconds
+    this.timeout = timeout || 10000;    // in milliseconds
 
     // initialize nonce to current unix time in milliseconds
     this.nonce = (new Date()).getTime();
@@ -33,7 +33,17 @@ IndependentReserve.prototype.postRequest = function postRequest(action, callback
     var path = '/Private/' + action;
 
     var nonce = this.nonce++;
-    var message = nonce + this.key;
+    var url = this.server + path;
+
+    // create a string of comma separated values
+    var message = [url, 'apiKey=' + this.key, 'nonce=' + nonce].join(',') ;
+
+    // append a string of comma separated key=value pairs
+    _.keys(params).forEach(function(key)
+    {
+        message = message + ',' + key + '=' + params[key];
+    });
+
     var signer = crypto.createHmac('sha256', new Buffer(this.secret, 'utf8'));
     var signature = signer.update(message).digest('hex').toUpperCase();
 
@@ -44,7 +54,7 @@ IndependentReserve.prototype.postRequest = function postRequest(action, callback
     }, params);
 
     var options = {
-        url: this.server + path,
+        url: url,
         method: 'POST',
         headers: headers,
         json: postData,
