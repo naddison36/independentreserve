@@ -179,7 +179,7 @@ IndependentReserve.prototype.getRecentTrades = function getRecentTrades(primaryC
     this.getRequest('GetRecentTrades', callback, {
         primaryCurrencyCode: primaryCurrencyCode,
         secondaryCurrencyCode: secondaryCurrencyCode,
-        numberOfHoursInThePastToRetrieve: numberOfHoursInThePastToRetrieve}
+        numberOfRecentTradesToRetrieve: numberOfRecentTradesToRetrieve}
     );
 };
 
