@@ -15,25 +15,47 @@ Please contact support@independentreserve.com if you are having trouble opening 
 ```js
 var IR = require('independentreserve');
 
-var irClient = new IR(your_key, your_secret);
+// Test public data APIs
+var publicClient = new IR();
 
-irClient.getMarketSummary("Xbt", "Usd", 
+// get ticker for BTCUSD
+publicClient.getMarketSummary("Xbt", "Usd", console.log);
+
+// get order book for BTCAUD
+publicClient.getOrderBook("Xbt", "Aud", console.log);
+
+// get last 20 BTCAUD trades
+publicClient.getRecentTrades("Xbt", "Aud", 20, console.log);
+
+var privateClient = new IR(your_key, your_secret);
+
+privateClient.getMarketSummary("Xbt", "Usd",
 	function(err, data){
 		console.log('bid ' + data.CurrentHighestBidPrice + ' ask ' + data.CurrentLowestOfferPrice);
 });
 
-irClient.placeLimitOrder("Xbt", "Usd", "LimitBid", 500.12, 1.12345678,
+privateClient.placeLimitOrder("Xbt", "Usd", "LimitBid", 500.12, 1.12345678,
 	function(err, data){
 		console.log('orderGuid ' + data.OrderGuid);
 });
 
-irClient.placeMarketOrder("Xbt", "Usd", "MarketOffer", 0.87654321,
+privateClient.placeMarketOrder("Xbt", "Usd", "MarketOffer", 0.87654321,
 	function(err, data){
 		console.log(data);
 });
 
-irClient.cancelOrder(orderGuid,
-	function(err, data){
-		console.log(data);
+// enter a Guid returned in one of the above placeLimitOrder calls
+var orderGuid = '';
+
+// get order details for specified Guid
+privateClient.getOrderDetails(orderGuid, function(err, data)
+{
+    console.log(data);
+});
+
+// cancel limit order
+privateClient.cancelOrder(orderGuid, function(err, data)
+{
+    console.log(data);
 });
 ```
