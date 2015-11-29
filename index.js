@@ -296,6 +296,27 @@ IndependentReserve.prototype.getTransactions = function getTransactions(accountG
     );
 };
 
+IndependentReserve.prototype.getTrades = function getTrades(pageIndex, pageSize, callback)
+{
+    var functionName = 'IndependentReserve.getTransactions()';
+
+    if ( !(pageIndex >= 1) )
+    {
+        var error = new VError('%s pageIndex %s is not >= 1', functionName);
+        return callback(error);
+    }
+    else if ( !(pageSize >= 1 && pageSize <= 50) )
+    {
+        var error = new VError('%s pageSize %s is not >= 1 and <= 50', functionName);
+        return callback(error);
+    }
+
+    this.postRequest('GetTrades', callback, {
+        pageIndex: pageIndex,
+        pageSize: pageSize}
+    );
+};
+
 IndependentReserve.prototype.getBitcoinDepositAddress = function getBitcoinDepositAddress(callback)
 {
     this.postRequest('GetBitcoinDepositAddress', callback);

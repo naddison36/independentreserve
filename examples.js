@@ -40,24 +40,30 @@ var privateClient = new IR(key, secret);
 //{
 //    console.log(data);
 //});
-
-// get first 20 open BTCAUD orders
-privateClient.getOpenOrders("Xbt", "Aud", 1, 20, function(err, data)
-{
-    console.log(data);
-});
-
-// enter a Guid returned in one of the above placeLimitOrder calls
-var orderGuid = '';
-
-//get first 20 open BTCAUD orders
-privateClient.getOrderDetails(orderGuid, function(err, data)
-{
-    console.log(data);
-});
-
+//
+//// get first 20 open BTCAUD orders
+//privateClient.getOpenOrders("Xbt", "Aud", 1, 20, function(err, data)
+//{
+//    console.log(data);
+//});
+//
+//// enter a Guid returned in one of the above placeLimitOrder calls
+//var orderGuid = '';
+//
+////get first 20 open BTCAUD orders
+//privateClient.getOrderDetails(orderGuid, function(err, data)
+//{
+//    console.log(data);
+//});
+//
 //// cancel limit order
 //privateClient.cancelOrder(orderGuid, function(err, data)
+//{
+//    console.log(data);
+//});
+//
+//// get the first 50 trades executed by the account the API key is linked to
+//privateClient.getTrades(1, 50, function(err, data)
 //{
 //    console.log(data);
 //});

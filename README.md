@@ -58,4 +58,10 @@ privateClient.cancelOrder(orderGuid, function(err, data)
 {
     console.log(data);
 });
+
+// get the first 50 trades executed by the account the API key is linked to
+privateClient.getTrades(1, 50, function(err, data)
+{
+    console.log(data);
+});
 ```
