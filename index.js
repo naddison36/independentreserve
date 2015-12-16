@@ -266,15 +266,9 @@ IndependentReserve.prototype.getClosedOrders = function getClosedOrders(primaryC
     );
 };
 
-IndependentReserve.prototype.getAccounts = function getAccounts(callback)
+IndependentReserve.prototype.getClosedFilledOrders = function getClosedFilledOrders(primaryCurrencyCode, secondaryCurrencyCode, pageIndex, pageSize, callback)
 {
-    this.postRequest('GetAccounts', callback);
-};
-
-
-IndependentReserve.prototype.getTransactions = function getTransactions(accountGuid, fromTimestampUtc, toTimestampUtc, pageIndex, pageSize, callback)
-{
-    var functionName = 'IndependentReserve.getTransactions()';
+    var functionName = 'IndependentReserve.getClosedFilledOrders()';
 
     if ( !(pageIndex >= 1) )
     {
@@ -287,18 +281,68 @@ IndependentReserve.prototype.getTransactions = function getTransactions(accountG
         return callback(error);
     }
 
-    this.postRequest('GetTransactions', callback, {
-        accountGuid: accountGuid,
-        fromTimestampUtc: fromTimestampUtc,
-        toTimestampUtc: toTimestampUtc,
+    this.postRequest('GetClosedFilledOrders', callback, {
+        primaryCurrencyCode: primaryCurrencyCode,
+        secondaryCurrencyCode: secondaryCurrencyCode,
         pageIndex: pageIndex,
         pageSize: pageSize}
     );
 };
 
-IndependentReserve.prototype.getTrades = function getTrades(pageIndex, pageSize, callback)
+IndependentReserve.prototype.getAccounts = function getAccounts(callback)
+{
+    this.postRequest('GetAccounts', callback);
+};
+
+IndependentReserve.prototype.getTransactions = function getTransactions(accountGuid, fromTimestamp, toTimestamp, pageIndex, pageSize, txTypes, callback)
 {
     var functionName = 'IndependentReserve.getTransactions()';
+
+    if ( !(fromTimestamp instanceof Date) )
+    {
+        var error = new VError('%s fromTimestamp %s must be a Date', fromTimestamp);
+        return callback(error);
+    }
+    else if ( toTimestamp == null || !(toTimestamp instanceof Date) )
+    {
+        var error = new VError('%s toTimestamp %s must be a null or a Date', toTimestamp);
+        return callback(error);
+    }
+    else if ( !(pageIndex >= 1) )
+    {
+        var error = new VError('%s pageIndex %s is not >= 1', functionName);
+        return callback(error);
+    }
+    else if ( !(pageSize >= 1 && pageSize <= 50) )
+    {
+        var error = new VError('%s pageSize %s is not >= 1 and <= 50', functionName);
+        return callback(error);
+    }
+
+    var options = {
+        accountGuid: accountGuid,
+        fromTimestampUtc: fromTimestamp.toISOString(),
+        pageIndex: pageIndex,
+        pageSize: pageSize,
+        txTypes: txTypes
+    };
+
+    if (toTimestamp != null && toTimestamp instanceof Date)
+    {
+        options.toTimestampUtc = toTimestamp.toISOString();
+    }
+
+    if (txTypes != null && toTimestamp instanceof Array)
+    {
+        options.txTypes = txTypes;
+    }
+
+    this.postRequest('GetTransactions', callback, options);
+};
+
+IndependentReserve.prototype.getTrades = function getTrades(pageIndex, pageSize, callback)
+{
+    var functionName = 'IndependentReserve.getTrades()';
 
     if ( !(pageIndex >= 1) )
     {
@@ -320,6 +364,40 @@ IndependentReserve.prototype.getTrades = function getTrades(pageIndex, pageSize,
 IndependentReserve.prototype.getBitcoinDepositAddress = function getBitcoinDepositAddress(callback)
 {
     this.postRequest('GetBitcoinDepositAddress', callback);
+};
+
+IndependentReserve.prototype.getBitcoinDepositAddresses = function getBitcoinDepositAddresses(pageIndex, pageSize, callback)
+{
+    this.postRequest('GetBitcoinDepositAddresses', callback, {
+        pageIndex: pageIndex,
+        pageSize: pageSize
+    });
+};
+
+IndependentReserve.prototype.synchBitcoinAddressWithBlockchain = function synchBitcoinAddressWithBlockchain(bitcoinAddress, callback)
+{
+    this.postRequest('SynchBitcoinAddressWithBlockchain', callback, {
+        bitcoinAddress: bitcoinAddress
+    });
+};
+
+IndependentReserve.prototype.withdrawBitcoin = function withdrawBitcoin(amount, bitcoinAddress, comment, callback)
+{
+    this.postRequest('WithdrawBitcoin', callback, {
+        amount: amount,
+        bitcoinAddress: bitcoinAddress,
+        comment: comment
+    });
+};
+
+IndependentReserve.prototype.requestFiatWithdrawal = function requestFiatWithdrawal(currency, withdrawalAmount, withdrawalBankAccountName, comment, callback)
+{
+    this.postRequest('RequestFiatWithdrawal', callback, {
+        secondaryCurrencyCode: currency,
+        withdrawalAmount: withdrawalAmount,
+        withdrawalBankAccountName: withdrawalBankAccountName,
+        comment: comment
+    });
 };
 
 module.exports = IndependentReserve;

@@ -67,4 +67,23 @@ var privateClient = new IR(key, secret);
 //{
 //    console.log(data);
 //});
+//
+//// gets all the Usd deposit and withdrawal transactions between two dates
+//privateClient.getAccounts(function(err, accounts)
+//{
+//    console.log(err, accounts);
+//
+//    var fromDate = new Date('2014', '1', '1');
+//    var toDate = new Date('2015', '1', '1');
+//
+//    accounts.forEach(function(account)
+//    {
+//        if (account.CurrencyCode == 'Usd')
+//        {
+//            privateClient.getTransactions(account.AccountGuid, fromDate, toDate, 1, 50, ['Deposit','Withdrawal'], function(err, transactions) {
+//                console.log(err, transactions);
+//            });
+//        }
+//    });
+//});
 
