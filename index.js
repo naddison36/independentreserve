@@ -215,16 +215,17 @@ IndependentReserve.prototype.cancelOrder = function cancelOrder(orderGuid, callb
 
 IndependentReserve.prototype.getOpenOrders = function getOpenOrders(primaryCurrencyCode, secondaryCurrencyCode, pageIndex, pageSize, callback)
 {
-    var functionName = 'IndependentReserve.getOpenOrders()';
+    var functionName = 'IndependentReserve.getOpenOrders()',
+        error;
 
     if ( !(pageIndex >= 1) )
     {
-        var error = new VError('%s pageIndex %s is not >= 1', functionName);
+        error = new VError('%s pageIndex %s is not >= 1', functionName, pageIndex);
         return callback(error);
     }
     else if ( !(pageSize >= 1 && pageSize <= 50) )
     {
-        var error = new VError('%s pageSize %s is not >= 1 and <= 50', functionName);
+        error = new VError('%s pageSize %s is not >= 1 and <= 50', functionName, pageSize);
         return callback(error);
     }
 
@@ -245,16 +246,17 @@ IndependentReserve.prototype.getOrderDetails = function getOrderDetails(orderGui
 
 IndependentReserve.prototype.getClosedOrders = function getClosedOrders(primaryCurrencyCode, secondaryCurrencyCode, pageIndex, pageSize, callback)
 {
-    var functionName = 'IndependentReserve.getClosedOrders()';
+    var functionName = 'IndependentReserve.getClosedOrders()',
+        error;
 
     if ( !(pageIndex >= 1) )
     {
-        var error = new VError('%s pageIndex %s is not >= 1', functionName);
+        error = new VError('%s pageIndex %s is not >= 1', functionName, pageIndex);
         return callback(error);
     }
     else if ( !(pageSize >= 1 && pageSize <= 50) )
     {
-        var error = new VError('%s pageSize %s is not >= 1 and <= 50', functionName);
+        error = new VError('%s pageSize %s is not >= 1 and <= 50', functionName, pageSize);
         return callback(error);
     }
 
@@ -268,16 +270,17 @@ IndependentReserve.prototype.getClosedOrders = function getClosedOrders(primaryC
 
 IndependentReserve.prototype.getClosedFilledOrders = function getClosedFilledOrders(primaryCurrencyCode, secondaryCurrencyCode, pageIndex, pageSize, callback)
 {
-    var functionName = 'IndependentReserve.getClosedFilledOrders()';
+    var functionName = 'IndependentReserve.getClosedFilledOrders()',
+        error;
 
     if ( !(pageIndex >= 1) )
     {
-        var error = new VError('%s pageIndex %s is not >= 1', functionName);
+        error = new VError('%s pageIndex %s is not >= 1', functionName, pageIndex);
         return callback(error);
     }
     else if ( !(pageSize >= 1 && pageSize <= 50) )
     {
-        var error = new VError('%s pageSize %s is not >= 1 and <= 50', functionName);
+        error = new VError('%s pageSize %s is not >= 1 and <= 50', functionName, pageSize);
         return callback(error);
     }
 
@@ -296,26 +299,27 @@ IndependentReserve.prototype.getAccounts = function getAccounts(callback)
 
 IndependentReserve.prototype.getTransactions = function getTransactions(accountGuid, fromTimestamp, toTimestamp, pageIndex, pageSize, txTypes, callback)
 {
-    var functionName = 'IndependentReserve.getTransactions()';
+    var functionName = 'IndependentReserve.getTransactions()',
+        error;
 
     if ( !(fromTimestamp instanceof Date) )
     {
-        var error = new VError('%s fromTimestamp %s must be a Date', fromTimestamp);
+        error = new VError('%s fromTimestamp %s must be a Date', functionName, fromTimestamp);
         return callback(error);
     }
     else if ( toTimestamp == null || !(toTimestamp instanceof Date) )
     {
-        var error = new VError('%s toTimestamp %s must be a null or a Date', toTimestamp);
+        error = new VError('%s toTimestamp %s must be a null or a Date', functionName, toTimestamp);
         return callback(error);
     }
     else if ( !(pageIndex >= 1) )
     {
-        var error = new VError('%s pageIndex %s is not >= 1', functionName);
+        error = new VError('%s pageIndex %s is not >= 1', functionName, pageIndex);
         return callback(error);
     }
     else if ( !(pageSize >= 1 && pageSize <= 50) )
     {
-        var error = new VError('%s pageSize %s is not >= 1 and <= 50', functionName);
+        error = new VError('%s pageSize %s is not >= 1 and <= 50', functionName, pageSize);
         return callback(error);
     }
 
@@ -342,16 +346,17 @@ IndependentReserve.prototype.getTransactions = function getTransactions(accountG
 
 IndependentReserve.prototype.getTrades = function getTrades(pageIndex, pageSize, callback)
 {
-    var functionName = 'IndependentReserve.getTrades()';
+    var functionName = 'IndependentReserve.getTrades()',
+        error;
 
     if ( !(pageIndex >= 1) )
     {
-        var error = new VError('%s pageIndex %s is not >= 1', functionName);
+        error = new VError('%s pageIndex %s is not >= 1', functionName, pageIndex);
         return callback(error);
     }
     else if ( !(pageSize >= 1 && pageSize <= 50) )
     {
-        var error = new VError('%s pageSize %s is not >= 1 and <= 50', functionName);
+        error = new VError('%s pageSize %s is not >= 1 and <= 50', functionName, pageSize);
         return callback(error);
     }
 
