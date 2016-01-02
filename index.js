@@ -208,6 +208,38 @@ IndependentReserve.prototype.placeMarketOrder = function placeMarketOrder(primar
     );
 };
 
+/**
+ * Provides a single method to place limit or market orders
+ * price is ignored for market orders
+ */
+IndependentReserve.prototype.placeOrder = function placeOrder(primaryCurrencyCode, secondaryCurrencyCode, orderType, price, volume, callback)
+{
+    if (orderType == 'MarketOffer' || orderType == 'MarketBid')
+    {
+        this.postRequest('PlaceMarketOrder', callback, {
+            primaryCurrencyCode: primaryCurrencyCode,
+            secondaryCurrencyCode: secondaryCurrencyCode,
+            orderType: orderType,
+            volume: volume}
+        );
+    }
+    else if (orderType == 'LimitOffer' || orderType == 'LimitBid')
+    {
+        this.postRequest('PlaceLimitOrder', callback, {
+            primaryCurrencyCode: primaryCurrencyCode,
+            secondaryCurrencyCode: secondaryCurrencyCode,
+            orderType: orderType,
+            price: price,
+            volume: volume}
+        );
+    }
+    else
+    {
+        var err = new VError('orderType parameter must equal "MarketOffer", "MarketBid,", "LimitOffer" or "LimitBid" - not %s', orderType);
+        callback(err);
+    }
+};
+
 IndependentReserve.prototype.cancelOrder = function cancelOrder(orderGuid, callback)
 {
     this.postRequest('CancelOrder', callback, {orderGuid: orderGuid});
