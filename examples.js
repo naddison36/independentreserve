@@ -24,19 +24,25 @@ var privateClient = new IR(key, secret);
 // the following will execute orders against the IR exchange. Uncomment and be sure you are happy with the parameters before executing
 
 //// buy limit order against BTCUSD
-//privateClient.placeLimitOrder("Xbt", "Usd", "LimitBid", 123.12, 0.12345678, function(err, data)
+//privateClient.placeOrder("Xbt", "Usd", "LimitBid", 123.12, 0.12345678, function(err, data)
 //{
 //    console.log('orderGuid ' + data.OrderGuid);
 //});
 //
 //// sell limit order against BTCAUD
-//privateClient.placeLimitOrder("Xbt", "Aud", "LimitOffer", 567.12, 0.01, function(err, data)
+//privateClient.placeOrder("Xbt", "Aud", "LimitOffer", 567.12, 0.01, function(err, data)
 //{
 //    console.log('orderGuid ' + data.OrderGuid);
 //});
 //
 //// sell market order
-//privateClient.placeMarketOrder("Xbt", "Usd", "MarketOffer", 0.87654321, function(err, data)
+//privateClient.placeOrder("Xbt", "Nzd", "MarketOffer", null, 0.87654321, function(err, data)
+//{
+//    console.log(data);
+//});
+//
+//// buy market order
+//privateClient.placeOrder("Xbt", "Aud", "MarketBid", null, 0.87654321, function(err, data)
 //{
 //    console.log(data);
 //});
