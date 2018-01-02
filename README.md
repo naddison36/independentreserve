@@ -1,6 +1,8 @@
 Independent Reserve Javascript API Client
 ===============
 
+[![npm version](https://badge.fury.io/js/independentreserve.svg)](https://badge.fury.io/js/independentreserve)
+
 This is a node.js wrapper for the private and public methods exposed by the [Independent Reserve API](https://www.independentreserve.com/API).
 You will need have a registered account with [Independent Reserve](https://www.independentreserve.com) and generated API keys to access the private methods.
 
