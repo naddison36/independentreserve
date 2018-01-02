@@ -443,4 +443,9 @@ IndependentReserve.prototype.requestFiatWithdrawal = function requestFiatWithdra
     });
 };
 
+IndependentReserve.prototype.getBrokerageFees = function getBrokerageFees(callback)
+{
+    this.postRequest('GetBrokerageFees', callback);
+};
+
 module.exports = IndependentReserve;

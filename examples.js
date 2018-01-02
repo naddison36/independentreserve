@@ -1,4 +1,5 @@
 var IR = require('independentreserve');
+// var IR = require('./index');
 
 var publicClient = new IR();
 
@@ -92,4 +93,8 @@ var privateClient = new IR(key, secret);
 //        }
 //    });
 //});
-
+// // get brokerage fee
+// privateClient.getBrokerageFees(function(err, data)
+// {
+//    console.log(data);
+// });
