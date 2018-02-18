@@ -98,3 +98,13 @@ var privateClient = new IR(key, secret);
 // {
 //    console.log(data);
 // });
+// // get BTC deposit address
+// privateClient.getDigitalCurrencyDepositAddress('Xbt', function(err, data)
+// {
+//    console.log(data);
+// });
+// //get ETH deposit addresses
+// privateClient.getDigitalCurrencyDepositAddresses('Eth', 1, 5, function(err, data)
+// {
+//     console.log(data);
+// });

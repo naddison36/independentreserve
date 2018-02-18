@@ -23,7 +23,7 @@ IndependentReserve.prototype.postRequest = function postRequest(action, callback
 
     if(!this.key || !this.secret)
     {
-        var error = new VError('The API key and secret must be set on initiation of the IndependentReserve function for private API request.');
+        var error = new Error('The API key and secret must be set on initiation of the IndependentReserve function for private API request.');
         return callback(error);
     }
 
@@ -138,7 +138,7 @@ function executeRequest(options, requestDesc, callback)
 
         callback(error, data);
     });
-};
+}
 
 //
 // Public Functions
@@ -404,32 +404,37 @@ IndependentReserve.prototype.getTrades = function getTrades(pageIndex, pageSize,
     );
 };
 
-IndependentReserve.prototype.getBitcoinDepositAddress = function getBitcoinDepositAddress(callback)
+IndependentReserve.prototype.getDigitalCurrencyDepositAddress = function getDigitalCurrencyDepositAddress(primaryCurrencyCode, callback)
 {
-    this.postRequest('GetBitcoinDepositAddress', callback);
+    this.postRequest('GetDigitalCurrencyDepositAddress', callback, {
+        primaryCurrencyCode: primaryCurrencyCode
+    });
 };
 
-IndependentReserve.prototype.getBitcoinDepositAddresses = function getBitcoinDepositAddresses(pageIndex, pageSize, callback)
+IndependentReserve.prototype.getDigitalCurrencyDepositAddresses = function getDigitalCurrencyDepositAddresses(primaryCurrencyCode, pageIndex, pageSize, callback)
 {
-    this.postRequest('GetBitcoinDepositAddresses', callback, {
+    this.postRequest('GetDigitalCurrencyDepositAddresses', callback, {
+        primaryCurrencyCode: primaryCurrencyCode,
         pageIndex: pageIndex,
         pageSize: pageSize
     });
 };
 
-IndependentReserve.prototype.synchBitcoinAddressWithBlockchain = function synchBitcoinAddressWithBlockchain(bitcoinAddress, callback)
+IndependentReserve.prototype.synchDigitalCurrencyDepositAddressWithBlockchain = function synchDigitalCurrencyDepositAddressWithBlockchain(depositAddress, primaryCurrencyCode, callback)
 {
-    this.postRequest('SynchBitcoinAddressWithBlockchain', callback, {
-        bitcoinAddress: bitcoinAddress
+    this.postRequest('SynchDigitalCurrencyDepositAddressWithBlockchain', callback, {
+        depositAddress: depositAddress,
+        primaryCurrencyCode: primaryCurrencyCode
     });
 };
 
-IndependentReserve.prototype.withdrawBitcoin = function withdrawBitcoin(amount, bitcoinAddress, comment, callback)
+IndependentReserve.prototype.withdrawDigitalCurrency = function WithdrawDigitalCurrency(amount, withdrawalAddress, comment, primaryCurrencyCode, callback)
 {
-    this.postRequest('WithdrawBitcoin', callback, {
+    this.postRequest('WithdrawDigitalCurrency', callback, {
         amount: amount,
-        bitcoinAddress: bitcoinAddress,
-        comment: comment
+        withdrawalAddress: withdrawalAddress,
+        comment: comment,
+        primaryCurrencyCode: primaryCurrencyCode
     });
 };
 
