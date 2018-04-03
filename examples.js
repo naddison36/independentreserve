@@ -108,3 +108,8 @@ var privateClient = new IR(key, secret);
 // {
 //     console.log(data);
 // });
+// //withdraw ETH
+// privateClient.withdrawDigitalCurrency(1, '0x775053a6125cb51e618eb132f00e93d6033934ad', '', 'Eth', function(err, data)
+// {
+//   console.log(data);
+// });

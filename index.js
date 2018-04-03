@@ -94,6 +94,7 @@ IndependentReserve.prototype.getRequest = function(action, callback, params)
 function executeRequest(options, requestDesc, callback)
 {
     var functionName = 'IndependentReserve.executeRequest()';
+    var self = this;
 
     request(options, function(err, response, data)
     {
@@ -110,29 +111,33 @@ function executeRequest(options, requestDesc, callback)
                 response.statusCode, requestDesc, response.statusMessage);
             error.name = response.statusCode;
         }
-        else if (!data)
+        // only WithdrawDigitalCurrency does not return any data
+        else if (options.url !== self.server + "/Private/WithdrawDigitalCurrency")
         {
-            error = new VError('%s failed %s. No data returned.', functionName, requestDesc );
-        }
-        else if (data.Message)
-        {
-            error = new VError('%s failed %s. Response message: %s', functionName, requestDesc, data.Message);
-            error.name = data.Message;
-        }
-        // if request was not able to parse json response into an object
-        else if (!_.isObject(data) )
-        {
-            // try and parse HTML body form response
-            $ = cheerio.load(data);
-            var responseBody = $('body').text();
-
-            if (responseBody)
+            if (!data)
             {
-                error = new VError(err, '%s could not json parse response from %s. Response body:\n%s', functionName, requestDesc, responseBody);
+                error = new VError('%s failed %s. No data returned.', functionName, requestDesc );
             }
-            else
+            else if (data.Message)
             {
-                error = new VError(err, '%s could not parse json or HTML body from %s', functionName, requestDesc);
+                error = new VError('%s failed %s. Response message: %s', functionName, requestDesc, data.Message);
+                error.name = data.Message;
+            }
+            // if request was not able to parse json response into an object
+            else if (!_.isObject(data) )
+            {
+                // try and parse HTML body form response
+                $ = cheerio.load(data);
+                var responseBody = $('body').text();
+
+                if (responseBody)
+                {
+                    error = new VError(err, '%s could not json parse response from %s. Response body:\n%s', functionName, requestDesc, responseBody);
+                }
+                else
+                {
+                    error = new VError(err, '%s could not parse json or HTML body from %s', functionName, requestDesc);
+                }
             }
         }
 
