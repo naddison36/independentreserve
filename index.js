@@ -64,7 +64,7 @@ IndependentReserve.prototype.postRequest = function postRequest(action, callback
     var requestDesc = util.format('%s request to url %s with nonce %s and params %s',
         options.method, options.url, nonce, JSON.stringify(params));
 
-    executeRequest(options, requestDesc, callback);
+    executeRequest(options, requestDesc, action, callback);
 };
 
 IndependentReserve.prototype.getRequest = function(action, callback, params)
@@ -88,13 +88,12 @@ IndependentReserve.prototype.getRequest = function(action, callback, params)
     var requestDesc = util.format('%s request to url %s with params %s',
         options.method, options.url, JSON.stringify(params));
 
-    executeRequest(options, requestDesc, callback);
+    executeRequest(options, requestDesc, action, callback);
 };
 
-function executeRequest(options, requestDesc, callback)
+function executeRequest(options, requestDesc, action, callback)
 {
     var functionName = 'IndependentReserve.executeRequest()';
-    var self = this;
 
     request(options, function(err, response, data)
     {
@@ -112,7 +111,7 @@ function executeRequest(options, requestDesc, callback)
             error.name = response.statusCode;
         }
         // only WithdrawDigitalCurrency does not return any data
-        else if (options.url !== self.server + "/Private/WithdrawDigitalCurrency")
+        else if (action !== "WithdrawDigitalCurrency")
         {
             if (!data)
             {
